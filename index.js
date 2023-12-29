@@ -1,9 +1,13 @@
-//STANDAR DE ENMASCRIPT 6 O MODULOS DE JAVASCRIPT
+//STANDAR DE ECMASCRIPT 6 O MODULOS DE JAVASCRIPT
 //SE AGREGA "type": "module" en package.json
 
 import express from "express"
 import http from "http"
 import { Server as SocketServer } from "socket.io";
+import router from "./routes/routes.js"
+import cors from "cors"
+import bodyParser from "body-parser";
+import morgan from "morgan";
 
 const app = express()
 const server= http.createServer(app)
@@ -12,6 +16,11 @@ const io = new SocketServer(server, {
         origin: "http://localhost:3000"
     }
 })
+
+app.use(cors())
+app.use(bodyParser.urlencoded({ extended: true }));
+app.use(morgan('dev'));
+app.use(router)
 
 io.on('connection', socket => {
     console.log(socket.id);
