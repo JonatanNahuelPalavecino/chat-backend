@@ -42,7 +42,7 @@ io.on('connection', socket => {
         if (usuario) {
           const index = usuariosConectados.indexOf(usuario);
           usuariosConectados.splice(index, 1);
-          socket.emit('userOnLine', {...usuariosConectados})
+          socket.broadcast.emit('userOnLine', [...usuariosConectados])
           console.log(`El usuario ${mail} cerró sesión.`);
         }
 
@@ -51,9 +51,10 @@ io.on('connection', socket => {
     socket.on('userOnLine', (mail) => {
 
         const online = usuariosConectados.some(user => user.usuario === mail)
-        console.log(online);
 
-        socket.emit('userOnLine', {...usuariosConectados})
+        online && socket.emit('userOnLine', [...usuariosConectados])
+
+        socket.broadcast.emit('userOnLine', [...usuariosConectados])
     })
 
 })
