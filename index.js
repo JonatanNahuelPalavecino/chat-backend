@@ -8,6 +8,7 @@ import router from "./routes/routes.js"
 import cors from "cors"
 import bodyParser from "body-parser";
 import morgan from "morgan";
+import usuariosConectados from "./funciones/funciones.js";
 
 const app = express()
 const server= http.createServer(app)
@@ -23,14 +24,38 @@ app.use(morgan('dev'));
 app.use(router)
 
 io.on('connection', socket => {
-    console.log(socket.id);
 
-    socket.on("message", (data) => {
+    socket.on("message", (data) => { 
+
+        const usuario = usuariosConectados.find(usuario => usuario.socketId === socket.id);
+        const from = usuario ? usuario.usuario : socket.id;
+
         socket.broadcast.emit("message", {
             data,
-            from: socket.id.slice(6)
+            from: from
         })
     })
+
+    socket.on("logout", (mail) => {
+
+        const usuario = usuariosConectados.find(usuario => usuario.usuario === mail);
+        if (usuario) {
+          const index = usuariosConectados.indexOf(usuario);
+          usuariosConectados.splice(index, 1);
+          socket.emit('userOnLine', {...usuariosConectados})
+          console.log(`El usuario ${mail} cerró sesión.`);
+        }
+
+    })
+
+    socket.on('userOnLine', (mail) => {
+
+        const online = usuariosConectados.some(user => user.usuario === mail)
+        console.log(online);
+
+        socket.emit('userOnLine', {...usuariosConectados})
+    })
+
 })
 
 server.listen(8000)
